@@ -1,10 +1,16 @@
+SOURCES.c= main.c simple_shell.c
+INCLUDES= simple_shell.h
+CFLAGS=
+SLIBS=
+PROGRAM = main
 
-all : simple_shell
+OBJECTS= $(SOURCES.c:.c=.o)
+.KEEP_STATE:
+debug := CFLAGS= -g
+all debug: $(PROGRAM)
 
-simple_shell: 
-	gcc -Wall -g simple_shell.c -o simple_shell
-
-
+$(PROGRAM): $(INCLUDES) ($OBJECTS)
+	$(LINK.c) -o $@ $(OBJECTS) $(SLIBS)
 
 clean:
-	rm -f *.o simple_shell
+	rm -f $(PROGRAM) $(OBJECTS)
