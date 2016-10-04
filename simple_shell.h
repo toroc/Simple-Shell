@@ -4,13 +4,7 @@
 #   File Created: 2/16/2016
 #   Last Modified: 2/24/2016
 #   Filename: simple_shell.c
-#   Description: This program implements a shell in C 
-#       which runs command line instructions and returns
-#       results. The shell supports redirection of standard
-#       input and standard output. The shell also supports
-#       foreground and background processes. The shell has
-#       three built in commands: exit, cd, and status. The
-#       shell supports comments and blank lines.
+#   Description: Shell function definitions.
 #
 #
 ******************************************************/

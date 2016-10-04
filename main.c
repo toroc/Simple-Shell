@@ -2,7 +2,7 @@
 #   By: Carol Toro
 #   File Created: 10/03/2016
 #   Last Modified: 10/03/2016
-#   Filename: main.c
+#   Filename: simple_shell.h
 #   Description: This program implements a shell in C 
 #       which runs command line instructions and returns
 #       results. The shell supports redirection of standard

@@ -376,7 +376,7 @@ void sh_fg_process(struct Shell *this_shell)
         if (file_desc_one == -1) {
 
 
-            fprintf(stdout, "smallsh: cannot open %s for input\n", args[2]);
+            fprintf(stdout, "simple_shell: cannot open %s for input\n", args[2]);
             fflush(stdout);
             this_shell->status=1;
             /*Print to the formatted string the failed exit value*/
@@ -402,7 +402,7 @@ void sh_fg_process(struct Shell *this_shell)
 
             /*File Open failed*/
             if (file_desc_one == -1) {
-                fprintf(stdout, "smallsh: cannot open %s for input\n", args[2]);
+                fprintf(stdout, "simple_shell: cannot open %s for input\n", args[2]);
                 fflush(stdout);
 
                 this_shell->status = 1;
