@@ -1,10 +1,17 @@
 /******************************************************
+#   CS 344 Operating Systems
 #   By: Carol Toro
-#   File Created: 10/03/2016
-#   Last Modified: 10/03/2016
-#   Filename: simple_shell.h
-#   Description: Defines shell data type and defines
-#       shell execution functions
+#   File Created: 2/16/2016
+#   Last Modified: 2/24/2016
+#   Filename: simple_shell.c
+#   Description: This program implements a shell in C 
+#       which runs command line instructions and returns
+#       results. The shell supports redirection of standard
+#       input and standard output. The shell also supports
+#       foreground and background processes. The shell has
+#       three built in commands: exit, cd, and status. The
+#       shell supports comments and blank lines.
+#
 #
 ******************************************************/
 #include <errno.h>
@@ -71,3 +78,7 @@ void sh_bg_process(struct Shell *this_shell);
 void sh_catch_interr(int signo);
 void sh_kill_zombies(struct Shell *this_shell);
 void sh_catch_bg(struct Shell *this_shell);
+
+
+
+

@@ -10,47 +10,6 @@
 
 
 /******************************************************
-#   Built-in Shell Commands
-******************************************************/
-/******************************************************
-#   sh_change_directory
-#   @desc: change directory based on user's path
-#   @param: pointer to shell object
-#   @return: void
-******************************************************/
-void sh_change_directory(struct Shell *this_shell)
-{
-
-    /*1 arg: Change to HOME*/
-    if (this_shell->args_count == 1) {
-
-        /*Check to ensure it worked*/
-        if (chdir(getenv("HOME")) == -1) {
-            fprintf(stdout, "cd unable to go home\n");
-            fflush(stdout);
-        }
-    }
-
-    /*2 args: Change to Path*/
-    if (this_shell->args_count == 2) {
-
-        printf("the path is: %s\n", this_shell->arguments[1]);
-
-        /*Check to ensure it worked*/
-        if (chdir(this_shell->arguments[1]) == -1) {
-            fprintf(stdout, "cd unable to go to path: %s\n", this_shell->arguments[1]);
-            fflush(stdout);
-        }
-    }
-
-}
-
-/******************************************************
-#   sh_command_status
-#   @desc: print the status of last command to console
-#   @param: pointer to shell object
-#   @return: void
-/******************************************************
 #   Shell Structure Functions
 ******************************************************/
 /******************************************************
@@ -238,6 +197,76 @@ void sh_command_ground(struct Shell *this_shell)
             this_shell->ground = 0;
         }
         /*Read command*/
+        if (strncmp(this_shell->arguments[1], rdStr, amLen) == 0) {
+            /*Set read to true*/
+            this_shell->read = 1;
+        }
+        else {
+            /*Set read to false*/
+            this_shell->read = 0;
+        }
+        /*Write command*/
+        if (strncmp(this_shell->arguments[1], wrStr, amLen) == 0) {
+            /*Set write to true*/
+            this_shell->write = 1;
+        }
+        else {
+            /*Set write to false*/
+            this_shell->write = 0;
+        }
+
+    }
+    else {
+
+        /*Command is foreground w no redirection*/
+        this_shell->ground = 0;
+        this_shell->read = 0;
+        this_shell->write = 0;
+    }
+
+}
+
+/******************************************************
+#   Built-in Shell Commands
+******************************************************/
+/******************************************************
+#   sh_change_directory
+#   @desc: change directory based on user's path
+#   @param: pointer to shell object
+#   @return: void
+******************************************************/
+void sh_change_directory(struct Shell *this_shell)
+{
+
+    /*1 arg: Change to HOME*/
+    if (this_shell->args_count == 1) {
+
+        /*Check to ensure it worked*/
+        if (chdir(getenv("HOME")) == -1) {
+            fprintf(stdout, "cd unable to go home\n");
+            fflush(stdout);
+        }
+    }
+
+    /*2 args: Change to Path*/
+    if (this_shell->args_count == 2) {
+
+        printf("the path is: %s\n", this_shell->arguments[1]);
+
+        /*Check to ensure it worked*/
+        if (chdir(this_shell->arguments[1]) == -1) {
+            fprintf(stdout, "cd unable to go to path: %s\n", this_shell->arguments[1]);
+            fflush(stdout);
+        }
+    }
+
+}
+
+/******************************************************
+#   sh_command_status
+#   @desc: print the status of last command to console
+#   @param: pointer to shell object
+#   @return: void
 ******************************************************/
 void sh_command_status(struct Shell *this_shell)
 {
@@ -401,134 +430,6 @@ void sh_fg_process(struct Shell *this_shell)
             /*Redirect stdout to file*/
             file_desc_two = dup2(file_desc_one, 1);
             this_shell->arguments[1] = '\0';
-    }
-    else {
-        /*Parent*/
-        if (fg_child_PID > 0) {
-
-            do {
-                wait = waitpid(fg_child_PID, &status, 0);
-
-            } while (!WIFEXITED(status) && !WIFSIGNALED(status));
-
-            /*Child was terminated by a signal*/
-            if(flag==1){
-                sprintf(g_last_status, "terminated by signal %d", sig_num);
-            }else{
-                sprintf(g_last_status, "exit value %d", WEXITSTATUS(status));
-            }
-
-            /*Print statements used for debugging*/
-            //printf("parent: waiting\n");
-            //fflush(stdout);
-            //printf("parent: child exited [%d]\n", status);
-            //fflush(stdout);
-        }
-    }
-
-
-}
-
-/******************************************************
-#   sh_catch_bg
-#   @desc: catches BG processes that are done and prints
-#       their status to the console
-#   @param: pointer to shell object
-#   @return: void
-******************************************************/
-void sh_catch_bg(struct Shell *this_shell)
-{
-    pid_t cur_PID;
-    int status;
-    cur_PID=waitpid(-1, &status, WNOHANG);
-
-    int i;
-    int bg_count=this_shell->bg_count;
-
-    if(cur_PID>0){
-
-            for(i=0; i < bg_count; i++){
-
-                pid_t userPID=this_shell->bg_PIDs[i];
-
-                if(cur_PID ==userPID){
-
-                    /*Exit Status*/
-                    if(WIFEXITED(status)){
-
-                        fprintf(stdout,"background pid %d is done: exit value %d\n", cur_PID, WEXITSTATUS(status));
-                        fflush(stdout);
-
-                    }
-                    /*Exit Signal*/
-                    if(WIFSIGNALED(status)){
-                        fprintf(stdout,"background pid %d is done: terminated by signal %d\n", cur_PID, WTERMSIG(status));
-                        fflush(stdout);
-                    }
-                    /*Set item at that variable to 0*/
-                    this_shell->bg_PIDs[i]=0;
-
-            }
-
-        }
-    }
-
-}
-
-/******************************************************
-#   sh_kill_zombies
-#   @desc: loops thru array of BG PIDs and kills them
-#   @param: pointer to shell object
-#   @return: void
-******************************************************/
-void sh_kill_zombies(struct Shell *this_shell)
-{
-    int i=0;
-    /*Kill all remaining processes*/
-    for (i=0; i < this_shell->bg_count; i++)
-    {
-        /*skip PIDs set to 0*/
-        if (this_shell->bg_PIDs[i]!=0){
-            int zombie = this_shell->bg_PIDs[i];
-            kill(zombie, 15);
-        }
-
-
-    }
-
-}
-
-/******************************************************
-#   sh_catch_interr
-#   @desc: catches interruption signal of child process,
-#       updates signal flag and signal # global variable
-#   @param: int signo
-#   @return: void
-******************************************************/
-void sh_catch_interr(int signo)
-{
-
-    switch(signo){
-        case SIGHUP:
-            puts("terminated by signal 1");
-            fflush(stdout);
-            /*Set signal #*/
-            sig_num=1;
-            break;
-        case SIGINT:
-            puts("terminated by signal 2");
-            fflush(stdout);
-            sig_num=2;
-            break;
-        default:
-            puts("terminated by other signal");
-            return;
-    }
-
-    /*Set the flag to 1 to indicate child was terminated*/
-    flag=1;
-
-}
             this_shell->arguments[2] = '\0';
         }
         /*Set up redirection for read*/
@@ -688,33 +589,131 @@ void sh_reg_fg_process(struct Shell *this_shell)
         fflush(stdout);
         this_shell->status = 1;
 
-
-        if (strncmp(this_shell->arguments[1], rdStr, amLen) == 0) {
-            /*Set read to true*/
-            this_shell->read = 1;
-        }
-        else {
-            /*Set read to false*/
-            this_shell->read = 0;
-        }
-        /*Write command*/
-        if (strncmp(this_shell->arguments[1], wrStr, amLen) == 0) {
-            /*Set write to true*/
-            this_shell->write = 1;
-        }
-        else {
-            /*Set write to false*/
-            this_shell->write = 0;
-        }
-
     }
     else {
+        /*Parent*/
+        if (fg_child_PID > 0) {
 
-        /*Command is foreground w no redirection*/
-        this_shell->ground = 0;
-        this_shell->read = 0;
-        this_shell->write = 0;
+            do {
+                wait = waitpid(fg_child_PID, &status, 0);
+
+            } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+
+            /*Child was terminated by a signal*/
+            if(flag==1){
+                sprintf(g_last_status, "terminated by signal %d", sig_num);
+            }else{
+                sprintf(g_last_status, "exit value %d", WEXITSTATUS(status));
+            }
+
+            /*Print statements used for debugging*/
+            //printf("parent: waiting\n");
+            //fflush(stdout);
+            //printf("parent: child exited [%d]\n", status);
+            //fflush(stdout);
+        }
+    }
+
+
+}
+
+/******************************************************
+#   sh_catch_bg
+#   @desc: catches BG processes that are done and prints
+#       their status to the console
+#   @param: pointer to shell object
+#   @return: void
+******************************************************/
+void sh_catch_bg(struct Shell *this_shell)
+{
+    pid_t cur_PID;
+    int status;
+    cur_PID=waitpid(-1, &status, WNOHANG);
+
+    int i;
+    int bg_count=this_shell->bg_count;
+
+    if(cur_PID>0){
+
+            for(i=0; i < bg_count; i++){
+
+                pid_t userPID=this_shell->bg_PIDs[i];
+
+                if(cur_PID ==userPID){
+
+                    /*Exit Status*/
+                    if(WIFEXITED(status)){
+
+                        fprintf(stdout,"background pid %d is done: exit value %d\n", cur_PID, WEXITSTATUS(status));
+                        fflush(stdout);
+
+                    }
+                    /*Exit Signal*/
+                    if(WIFSIGNALED(status)){
+                        fprintf(stdout,"background pid %d is done: terminated by signal %d\n", cur_PID, WTERMSIG(status));
+                        fflush(stdout);
+                    }
+                    /*Set item at that variable to 0*/
+                    this_shell->bg_PIDs[i]=0;
+
+            }
+
+        }
     }
 
 }
 
+/******************************************************
+#   sh_kill_zombies
+#   @desc: loops thru array of BG PIDs and kills them
+#   @param: pointer to shell object
+#   @return: void
+******************************************************/
+void sh_kill_zombies(struct Shell *this_shell)
+{
+    int i=0;
+    /*Kill all remaining processes*/
+    for (i=0; i < this_shell->bg_count; i++)
+    {
+        /*skip PIDs set to 0*/
+        if (this_shell->bg_PIDs[i]!=0){
+            int zombie = this_shell->bg_PIDs[i];
+            kill(zombie, 15);
+        }
+
+
+    }
+
+}
+
+/******************************************************
+#   sh_catch_interr
+#   @desc: catches interruption signal of child process,
+#       updates signal flag and signal # global variable
+#   @param: int signo
+#   @return: void
+******************************************************/
+void sh_catch_interr(int signo)
+{
+
+    switch(signo){
+        case SIGHUP:
+            puts("terminated by signal 1");
+            fflush(stdout);
+            /*Set signal #*/
+            sig_num=1;
+            break;
+        case SIGINT:
+            puts("terminated by signal 2");
+            fflush(stdout);
+            sig_num=2;
+            break;
+        default:
+            puts("terminated by other signal");
+            return;
+    }
+
+    /*Set the flag to 1 to indicate child was terminated*/
+    flag=1;
+
+}
